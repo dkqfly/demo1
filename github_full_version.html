@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>多功能翻译工具 - GitHub版</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        nav {
+            margin-top: 20px;
+        }
+        
+        nav ul {
+            display: flex;
+            justify-content: center;
+            list-style: none;
+            gap: 10px;
+        }
+        
+        nav a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            background: rgba(255,255,255,0.2);
+            transition: all 0.3s;
+        }
+        
+        nav a.active, nav a:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 30px;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* 文字翻译样式 */
+        .language-selector {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        select {
+            padding: 12px 20px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            background: white;
+            cursor: pointer;
+            min-width: 150px;
+        }
+        
+        .arrow {
+            font-size: 24px;
+            margin: 0 15px;
+            color: #666;
+        }
+        
+        .swap-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-left: 15px;
+        }
+        
+        .swap-btn:hover {
+            background: #5a6fd8;
+        }
+        
+        .text-areas {
+            display: flex;
+            height: 400px;
+        }
+        
+        .text-area {
+            flex: 1;
+            padding: 20px;
+            border: none;
+            resize: none;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .text-area:focus {
+            outline: none;
+        }
+        
+        .left-panel {
+            border-right: 1px solid #e9ecef;
+        }
+        
+        .left-panel .text-area {
+            background: #f8f9fa;
+        }
+        
+        .right-panel .text-area {
+            background: white;
+        }
+        
+        .controls {
+            padding: 20px;
+            background: #f8f9fa;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .translate-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .translate-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .translate-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .action-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        
+        .action-btn:hover {
+            background: #5a6268;
+        }
+        
+        .stats {
+            padding: 10px 20px;
+            background: #e9ecef;
+            color: #666;
+            font-size: 14px;
+            text-align: right;
+        }
+        
+        /* 文档/图片翻译样式 */
+        .upload-section {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        
+        .upload-area {
+            border: 3px dashed #ddd;
+            border-radius: 15px;
+            padding: 60px 20px;
+            margin: 20px 0;
+            background: #fafafa;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .upload-area:hover, .upload-area.drag-over {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+        
+        .upload-icon {
+            font-size: 64px;
+            color: #ccc;
+            margin-bottom: 20px;
+        }
+        
+        .upload-text {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .upload-hint {
+            color: #999;
+            font-size: 14px;
+        }
+        
+        .upload-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        
+        .file-list {
+            margin-top: 30px;
+            text-align: left;
+        }
+        
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+        }
+        
+        .file-info {
+            flex: 1;
+        }
+        
+        .file-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .file-size {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .remove-file {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .remove-file:hover {
+            background: #c82333;
+        }
+        
+        .doc-controls {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .doc-output {
+            width: 100%;
+            height: 300px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            background: #f8f9fa;
+            overflow-y: auto;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            background: #28a745;
+            color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.error {
+            background: #dc3545;
+        }
+        
+        @media (max-width: 768px) {
+            .text-areas {
+                flex-direction: column;
+                height: auto;
+            }
+            
+            .left-panel {
+                border-right: none;
+                border-bottom: 1px solid #e9ecef;
+            }
+            
+            .language-selector {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .text-area {
+                height: 200px !important;
+            }
+            
+            nav ul {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .doc-controls {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌐 多功能翻译工具</h1>
+            <p>支持文字、文档、图片翻译的全能翻译器</p>
+            <nav>
+                <ul>
+                    <li><a href="#" class="tab-link active" data-tab="text">文字翻译</a></li>
+                    <li><a href="#" class="tab-link" data-tab="doc">文档/图片翻译</a></li>
+                </ul>
+            </nav>
+        </header>
+        
+        <!-- 文字翻译标签 -->
+        <div id="text-translate" class="tab-content active">
+            <div class="language-selector">
+                <select id="sourceLang">
+                    <option value="auto">自动检测</option>
+                    <option value="zh">中文</option>
+                    <option value="en" selected>英语</option>
+                    <option value="ja">日语</option>
+                    <option value="ko">韩语</option>
+                    <option value="fr">法语</option>
+                    <option value="es">西班牙语</option>
+                    <option value="ru">俄语</option>
+                    <option value="de">德语</option>
+                    <option value="it">意大利语</option>
+                    <option value="pt">葡萄牙语</option>
+                </select>
+                
+                <div class="arrow">⇄</div>
+                
+                <select id="targetLang">
+                    <option value="zh" selected>中文</option>
+                    <option value="en">英语</option>
+                    <option value="ja">日语</option>
+                    <option value="ko">韩语</option>
+                    <option value="fr">法语</option>
+                    <option value="es">西班牙语</option>
+                    <option value="ru">俄语</option>
+                    <option value="de">德语</option>
+                    <option value="it">意大利语</option>
+                    <option value="pt">葡萄牙语</option>
+                </select>
+                
+                <button class="swap-btn" onclick="swapLanguages()">🔄 交换</button>
+            </div>
+            
+            <div class="text-areas">
+                <div class="left-panel">
+                    <textarea 
+                        id="sourceText" 
+                        class="text-area" 
+                        placeholder="请输入要翻译的文本..."
+                        oninput="handleTextInput()"
+                    ></textarea>
+                </div>
+                <div class="right-panel">
+                    <textarea 
+                        id="targetText" 
+                        class="text-area" 
+                        placeholder="翻译结果将在这里显示..."
+                        readonly
+                    ></textarea>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <div class="action-buttons">
+                    <button class="action-btn" onclick="copyText()">📋 复制</button>
+                    <button class="action-btn" onclick="clearText()">🗑️ 清空</button>
+                    <button class="action-btn" onclick="speakText('source')">🔊 朗读原文</button>
+                    <button class="action-btn" onclick="speakText('target')">🔊 朗读译文</button>
+                </div>
+                
+                <button class="translate-btn" id="translateBtn" onclick="translateText()">
+                    🔄 翻译
+                </button>
+            </div>
+            
+            <div class="stats">
+                <span id="charCount">字符数: 0</span> | 
+                <span id="wordCount">词数: 0</span>
+            </div>
+        </div>
+        
+        <!-- 文档/图片翻译标签 -->
+        <div id="doc-translate" class="tab-content">
+            <div class="upload-section">
+                <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+                    <div class="upload-icon">📁</div>
+                    <div class="upload-text">点击选择文件或拖拽文件到此处</div>
+                    <div class="upload-hint">支持文档: .docx, .txt | 支持图片: .jpg, .png, .gif</div>
+                    <button class="upload-btn">选择文件</button>
+                </div>
+                
+                <input type="file" id="fileInput" multiple style="display: none;" onchange="handleFileSelect(event)">
+                
+                <div class="language-selector" style="justify-content: center;">
+                    <label>目标语言: </label>
+                    <select id="docTargetLang">
+                        <option value="zh" selected>中文</option>
+                        <option value="en">英语</option>
+                        <option value="ja">日语</option>
+                        <option value="ko">韩语</option>
+                        <option value="fr">法语</option>
+                        <option value="es">西班牙语</option>
+                        <option value="ru">俄语</option>
+                        <option value="de">德语</option>
+                        <option value="it">意大利语</option>
+                        <option value="pt">葡萄牙语</option>
+                    </select>
+                </div>
+                
+                <div class="file-list" id="fileList">
+                    <!-- 文件列表将在这里动态添加 -->
+                </div>
+                
+                <div class="doc-controls">
+                    <button class="action-btn" onclick="clearFiles()">🗑️ 清空文件</button>
+                    <button class="translate-btn" onclick="translateDocuments()">
+                        🔄 开始翻译
+                    </button>
+                </div>
+                
+                <div class="doc-output" id="docOutput">
+                    翻译结果将在这里显示...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="notification" id="notification"></div>
+
+    <script>
+        let currentTab = 'text';
+        let selectedFiles = [];
+        
+        // 通知函数
+        function showNotification(message, isError = false) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = 'notification' + (isError ? ' error' : '');
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // 标签切换
+        document.querySelectorAll('.tab-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                
+                // 移除所有活动状态
+                document.querySelectorAll('.tab-link').forEach(l => l.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                // 添加当前活动状态
+                link.classList.add('active');
+                const tabId = link.getAttribute('data-tab');
+                document.getElementById(`${tabId}-translate`).classList.add('active');
+                
+                currentTab = tabId;
+            });
+        });
+
+        // 文字翻译功能
+        let isTranslating = false;
+
+        function handleTextInput() {
+            updateStats();
+        }
+
+        function updateStats() {
+            const text = document.getElementById('sourceText').value;
+            const charCount = text.length;
+            const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
+            document.getElementById('charCount').textContent = `字符数: ${charCount}`;
+            document.getElementById('wordCount').textContent = `词数: ${wordCount}`;
+        }
+
+        async function translateText() {
+            if (isTranslating) return;
+            
+            const sourceText = document.getElementById('sourceText').value.trim();
+            const sourceLang = document.getElementById('sourceLang').value;
+            const targetLang = document.getElementById('targetLang').value;
+            
+            if (!sourceText) {
+                document.getElementById('targetText').value = '';
+                return;
+            }
+
+            if (sourceLang === targetLang) {
+                document.getElementById('targetText').value = sourceText;
+                showNotification('源语言和目标语言相同');
+                return;
+            }
+
+            isTranslating = true;
+            const btn = document.getElementById('translateBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading"></span> 翻译中...';
+
+            try {
+                // 使用免费的LibreTranslate API
+                const response = await fetch('https://libretranslate.com/translate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        q: sourceText,
+                        source: sourceLang === 'auto' ? 'auto' : getLibreLangCode(sourceLang),
+                        target: getLibreLangCode(targetLang),
+                        format: 'text'
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API请求失败: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                document.getElementById('targetText').value = data.translatedText;
+                showNotification('翻译完成！');
+            } catch (error) {
+                console.error('翻译错误:', error);
+                
+                // 如果LibreTranslate API失败，尝试使用另一个免费API
+                try {
+                    // 尝试使用Google Translate的非官方API
+                    const encodedText = encodeURIComponent(sourceText);
+                    const apiUrl = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${getGoogleLangCode(sourceLang)}&tl=${getGoogleLangCode(targetLang)}&dt=t&q=${encodedText}`;
+                    
+                    const response = await fetch(apiUrl);
+                    const data = await response.json();
+                    
+                    if (data && data[0]) {
+                        let result = '';
+                        for (let i = 0; i < data[0].length; i++) {
+                            if (data[0][i] && data[0][i][0]) {
+                                result += data[0][i][0];
+                            }
+                        }
+                        document.getElementById('targetText').value = result || '翻译失败';
+                        showNotification('翻译完成！');
+                    } else {
+                        throw new Error('无法解析翻译结果');
+                    }
+                } catch (secondError) {
+                    console.error('备用API也失败:', secondError);
+                    document.getElementById('targetText').value = `翻译失败: ${error.message}`;
+                    showNotification('翻译失败，请稍后重试', true);
+                }
+            } finally {
+                isTranslating = false;
+                btn.disabled = false;
+                btn.innerHTML = '🔄 翻译';
+            }
+        }
+
+        function swapLanguages() {
+            const sourceSelect = document.getElementById('sourceLang');
+            const targetSelect = document.getElementById('targetLang');
+            const sourceText = document.getElementById('sourceText').value;
+            const targetText = document.getElementById('targetText').value;
+            
+            // 交换语言选择
+            const tempLang = sourceSelect.value;
+            sourceSelect.value = targetSelect.value;
+            targetSelect.value = tempLang;
+            
+            // 交换文本
+            document.getElementById('sourceText').value = targetText;
+            document.getElementById('targetText').value = sourceText;
+            
+            // 触发翻译
+            if (targetText) {
+                translateText();
+            }
+        }
+
+        function copyText() {
+            const targetText = document.getElementById('targetText').value;
+            if (targetText) {
+                navigator.clipboard.writeText(targetText).then(() => {
+                    showNotification('翻译结果已复制！');
+                }).catch(err => {
+                    // 降级方案
+                    const textArea = document.createElement('textarea');
+                    textArea.value = targetText;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    showNotification('翻译结果已复制！');
+                });
+            } else {
+                showNotification('没有可复制的翻译结果！', true);
+            }
+        }
+
+        function clearText() {
+            document.getElementById('sourceText').value = '';
+            document.getElementById('targetText').value = '';
+            updateStats();
+        }
+
+        function speakText(type) {
+            const text = type === 'source' ? 
+                document.getElementById('sourceText').value : 
+                document.getElementById('targetText').value;
+                
+            if (text && 'speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.rate = 0.8;
+                utterance.pitch = 1;
+                speechSynthesis.speak(utterance);
+            } else {
+                showNotification('您的浏览器不支持语音合成功能！', true);
+            }
+        }
+
+        // 文档/图片翻译功能
+        function setupDragAndDrop() {
+            const uploadArea = document.getElementById('uploadArea');
+            
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, highlight, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, unhighlight, false);
+            });
+
+            function highlight() {
+                uploadArea.classList.add('drag-over');
+            }
+
+            function unhighlight() {
+                uploadArea.classList.remove('drag-over');
+            }
+
+            uploadArea.addEventListener('drop', handleDrop, false);
+
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                handleFiles(files);
+            }
+        }
+
+        function handleFileSelect(event) {
+            const files = event.target.files;
+            handleFiles(files);
+            // 清空文件输入，允许重复选择相同文件
+            event.target.value = '';
+        }
+
+        function handleFiles(files) {
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                if (isValidFileType(file)) {
+                    addFileToList(file);
+                } else {
+                    showNotification(`不支持的文件类型: ${file.name}`, true);
+                }
+            }
+        }
+
+        function isValidFileType(file) {
+            const fileName = file.name.toLowerCase();
+            const ext = '.' + fileName.split('.').pop();
+            const supportedTypes = ['.docx', '.txt', '.jpg', '.jpeg', '.png', '.gif'];
+            return supportedTypes.includes(ext);
+        }
+
+        function addFileToList(file) {
+            // 检查是否已存在同名文件
+            if (selectedFiles.some(f => f.name === file.name)) {
+                showNotification(`文件已存在: ${file.name}`, true);
+                return;
+            }
+
+            selectedFiles.push(file);
+            updateFileList();
+        }
+
+        function updateFileList() {
+            const fileList = document.getElementById('fileList');
+            fileList.innerHTML = '';
+
+            selectedFiles.forEach((file, index) => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                
+                const ext = '.' + file.name.split('.').pop().toLowerCase();
+                let fileType = '未知文件';
+                if (['.docx', '.txt'].includes(ext)) {
+                    fileType = '文档';
+                } else if (['.jpg', '.jpeg', '.png', '.gif'].includes(ext)) {
+                    fileType = '图片';
+                }
+
+                fileItem.innerHTML = `
+                    <div class="file-info">
+                        <div class="file-name">${file.name}</div>
+                        <div class="file-size">${fileType} | ${(file.size / 1024).toFixed(2)} KB</div>
+                    </div>
+                    <button class="remove-file" onclick="removeFile(${index})">移除</button>
+                `;
+                
+                fileList.appendChild(fileItem);
+            });
+        }
+
+        function removeFile(index) {
+            selectedFiles.splice(index, 1);
+            updateFileList();
+        }
+
+        function clearFiles() {
+            selectedFiles = [];
+            updateFileList();
+            showNotification('文件列表已清空');
+        }
+
+        async function translateDocuments() {
+            if (selectedFiles.length === 0) {
+                showNotification('请选择要翻译的文件', true);
+                return;
+            }
+
+            const targetLang = document.getElementById('docTargetLang').value;
+            const outputArea = document.getElementById('docOutput');
+            outputArea.innerHTML = '正在处理文件...';
+
+            try {
+                let allResults = [];
+                for (const file of selectedFiles) {
+                    const result = await processFile(file, targetLang);
+                    allResults.push(`<h3>文件: ${file.name}</h3><pre>${result}</pre><hr>`);
+                }
+                
+                outputArea.innerHTML = allResults.join('');
+                showNotification('文件翻译完成！');
+            } catch (error) {
+                console.error('文档处理错误:', error);
+                outputArea.innerHTML = `文档处理失败: ${error.message}`;
+                showNotification('文档处理失败', true);
+            }
+        }
+
+        async function processFile(file, targetLang) {
+            const fileName = file.name.toLowerCase();
+            const ext = '.' + fileName.split('.').pop();
+
+            if (['.jpg', '.jpeg', '.png', '.gif'].includes(ext)) {
+                // 图片处理：模拟OCR和翻译
+                return await processImage(file, targetLang);
+            } else if (['.docx', '.txt'].includes(ext)) {
+                // 文档处理：读取内容并翻译
+                return await processDocument(file, targetLang);
+            } else {
+                throw new Error(`不支持的文件类型: ${ext}`);
+            }
+        }
+
+        async function processImage(file, targetLang) {
+            // 模拟OCR处理
+            const ocrResult = `图片 "${file.name}" 中检测到的文本：\n\n[示例文本 - 在实际环境中会通过OCR技术提取真实文本]\n\n这是一段从图片中提取的示例文本，将被翻译成${getLanguageName(targetLang)}。`;
+            
+            // 翻译OCR结果
+            try {
+                const response = await fetch('https://libretranslate.com/translate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        q: ocrResult,
+                        source: 'zh',
+                        target: getLibreLangCode(targetLang),
+                        format: 'text'
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API请求失败: ${response.status}`);
+                }
+
+                const data = await response.json();
+                return data.translatedText;
+            } catch (error) {
+                return `${ocrResult}\n\n[注意：图片翻译需要OCR技术支持，在此环境中仅做演示]`;
+            }
+        }
+
+        async function processDocument(file, targetLang) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                
+                reader.onload = async (e) => {
+                    try {
+                        let content = '';
+                        
+                        if (file.name.toLowerCase().endsWith('.txt')) {
+                            content = e.target.result;
+                        } else {
+                            // 对于.docx文件，这里简化处理
+                            content = `[${file.name}] 文档内容示例\n\n这是从文档中提取的示例内容，实际应用中会使用专业的文档解析库来提取真实内容。\n\n以下是翻译成${getLanguageName(targetLang)}的结果：\n\n[文档内容将被翻译]`;
+                        }
+                        
+                        if (content.length > 5000) { // 如果内容太长，分批处理
+                            resolve(splitAndTranslate(content, targetLang));
+                        } else {
+                            // 翻译文档内容
+                            const response = await fetch('https://libretranslate.com/translate', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({
+                                    q: content,
+                                    source: 'auto',
+                                    target: getLibreLangCode(targetLang),
+                                    format: 'text'
+                                })
+                            });
+
+                            if (!response.ok) {
+                                throw new Error(`API请求失败: ${response.status}`);
+                            }
+
+                            const data = await response.json();
+                            resolve(data.translatedText);
+                        }
+                    } catch (error) {
+                        reject(error);
+                    }
+                };
+                
+                reader.onerror = () => reject(new Error('文件读取失败'));
+                
+                // 根据文件类型选择读取方式
+                if (file.name.toLowerCase().endsWith('.txt')) {
+                    reader.readAsText(file, 'utf-8');
+                } else {
+                    // 对于.docx等格式，这里简化处理
+                    resolve(`[${file.name}] 文档需要专业解析库来读取内容，此处为模拟结果。\n\n在实际部署环境中，会使用专业的文档解析技术来提取真实内容并进行翻译。`);
+                }
+            });
+        }
+
+        async function splitAndTranslate(text, targetLang) {
+            // 将长文本分割成较小的部分进行翻译
+            const maxLength = 4500; // API单次请求长度限制
+            const parts = [];
+            const translatedParts = [];
+
+            // 按句子或段落分割文本
+            let currentPart = '';
+            const sentences = text.match(/[^\.!?]+[\.!?]+/g) || [text];
+
+            for (const sentence of sentences) {
+                if ((currentPart + sentence).length > maxLength) {
+                    if (currentPart) {
+                        parts.push(currentPart.trim());
+                        currentPart = sentence;
+                    } else {
+                        // 单个句子就超过限制，按字符分割
+                        const chunks = splitTextByLength(sentence, maxLength);
+                        parts.push(...chunks);
+                    }
+                } else {
+                    currentPart += sentence;
+                }
+            }
+
+            if (currentPart) {
+                parts.push(currentPart.trim());
+            }
+
+            // 逐部分翻译
+            for (const part of parts) {
+                if (part) {
+                    const response = await fetch('https://libretranslate.com/translate', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            q: part,
+                            source: 'auto',
+                            target: getLibreLangCode(targetLang),
+                            format: 'text'
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`API请求失败: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    translatedParts.push(data.translatedText);
+                }
+            }
+
+            return translatedParts.join('\n\n');
+        }
+
+        function splitTextByLength(text, maxLength) {
+            const parts = [];
+            for (let i = 0; i < text.length; i += maxLength) {
+                parts.push(text.substring(i, i + maxLength));
+            }
+            return parts;
+        }
+
+        // 语言代码映射
+        function getLibreLangCode(code) {
+            const map = {
+                'zh': 'zh',
+                'en': 'en',
+                'ja': 'ja',
+                'ko': 'ko',
+                'fr': 'fr',
+                'es': 'es',
+                'ru': 'ru',
+                'de': 'de',
+                'it': 'it',
+                'pt': 'pt'
+            };
+            return map[code] || 'en';
+        }
+
+        function getGoogleLangCode(code) {
+            const map = {
+                'zh': 'zh-CN',
+                'en': 'en',
+                'ja': 'ja',
+                'ko': 'ko',
+                'fr': 'fr',
+                'es': 'es',
+                'ru': 'ru',
+                'de': 'de',
+                'it': 'it',
+                'pt': 'pt'
+            };
+            return map[code] || 'en';
+        }
+
+        function getLanguageName(code) {
+            const map = {
+                'zh': '中文',
+                'en': '英语',
+                'ja': '日语',
+                'ko': '韩语',
+                'fr': '法语',
+                'es': '西班牙语',
+                'ru': '俄语',
+                'de': '德语',
+                'it': '意大利语',
+                'pt': '葡萄牙语'
+            };
+            return map[code] || '未知语言';
+        }
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            updateStats();
+            setupDragAndDrop();
+            
+            // 添加键盘快捷键
+            document.addEventListener('keydown', function(e) {
+                if (e.ctrlKey && e.key === 'Enter' && currentTab === 'text') {
+                    translateText();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
